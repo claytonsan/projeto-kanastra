@@ -48,6 +48,52 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 - **[Active Logic](https://activelogic.com)**
 - **[byte5](https://byte5.de)**
 - **[OP.GG](https://op.gg)**
+ 
+## Instruções de Uso
+
+Docker e Docker Compose instalados.
+PHP 8.2 e Composer.
+
+1. Clonar o Repositório
+Primeiro, clone o repositório do Git:
+
+git clone https://github.com/claytonsan/projeto-kanastra.git
+cd projeto-kanastra
+
+2. Configuração
+2.1 Configurar Variáveis de Ambiente
+Renomeie o arquivo .env.example para .env e ajuste as configurações conforme necessário
+
+cp .env.example .env
+
+2.2 Gerar Chave da Aplicação
+Gere a chave da aplicação Laravel:
+
+./vendor/bin/sail artisan key:generate
+
+
+3. Subir o Ambiente com Docker
+Use o Laravel Sail para subir o ambiente com Docker:
+
+./vendor/bin/sail up -d
+
+Isso irá iniciar os serviços definidos no docker-compose.yml, como o servidor web e o banco de dados.
+
+4. Rodar Migrations e Seeders
+Após os serviços estarem no ar, execute as migrations e seeders para preparar o banco de dados:
+
+./vendor/bin/sail artisan migrate --seed
+
+5. Executar Testes
+Para rodar os testes, você pode executar o seguinte comando:
+
+./vendor/bin/sail test
+
+
+6. Encerrar os Contêineres
+Quando quiser parar o ambiente Docker, use:
+
+./vendor/bin/sail down
 
 ## Contributing
 

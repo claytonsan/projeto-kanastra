@@ -2,16 +2,22 @@
 
 namespace Tests\Unit;
 
-use App\Models\Boleto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Log;
 use App\Mail\BoletoGerado;
+use App\Models\Boleto;
+use App\Jobs\ProcessCsvJob;
 use Tests\TestCase;
+ 
 
 class BoletoTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** primeiro teste é o teste de geração de boleto, aqui com um array simples é verificado se o boleto está sendo criado no banco de dados */
+ 
     public function testGerarBoleto()
     {
         $data = [
@@ -32,6 +38,8 @@ class BoletoTest extends TestCase
         ]);
     }
 
+    /** segundo teste é o teste para verificar se o sistema irá duplicar boletos na hora da geração */
+
     public function testNaoGerarBoletoDuplicado()
     {
         $data = [
@@ -50,15 +58,17 @@ class BoletoTest extends TestCase
         Boleto::create($data);
     }
 
-    public function test_email_is_sent_when_boleto_is_generated()
+    /** terceiro teste é o teste para verificar se o sistema está disparando e-mail na hora da geração do boleto */
+
+    public function testDisparaEmailGeracao()
     {
         Mail::fake();
 
         $data = [
             'name' => 'John Doe',
             'governmentId' => '11111111111',
-            'email' => 'claytonsantos13@hotmail.com', // Deve corresponder ao e-mail utilizado no envio
-            'debtAmount' => 5666.00,
+            'email' => 'claytonsantos13@hotmail.com', 
+            'debtAmount' => 56.00,
             'debtDueDate' => '2022-10-12',
             'debtId' => '1adb6ccf-ff16-467f-bea7-5f05d494280f',
         ];
@@ -79,24 +89,21 @@ class BoletoTest extends TestCase
         ]);
     }
 
-    public function test_processar_boletos_de_csv()
+    /** quarto teste é pego um arquivo que se encontra na pasta file e é percorrido para salvar as informações dos boletos no banco e disparar e-mails*/
+
+    public function testProcessarBoletosCsv()
     {
         Mail::fake();
 
         // rota do csv
         $filePath = public_path('input.csv');
-
+        
         // abrir o arquivo para leitura
         $file = fopen($filePath, 'r');
         
         // Ignora o cabeçalho
-        fgetcsv($file);
-
-        // Percorre cada linha do arquivo
-        $lineCount = 0;
-        $maxLines = 50; // limite para não pesar a máquina
-
-        while (($data = fgetcsv($file)) !== FALSE && $lineCount < $maxLines) {
+        fgetcsv($file); 
+        while (($data = fgetcsv($file)) !== FALSE) {
 
             $boletoData = [
                 'name' => $data[0],
@@ -129,11 +136,34 @@ class BoletoTest extends TestCase
                 return $mail->hasTo($boletoData['email']);
             });
 
-            $lineCount++;
+            
          }
 
         // fechar o arquivo
         fclose($file);
+    }
+
+    /** nesse teste eu crio um arquivo csv sem as informações corretas para poder validar se salva as informações ou da erro */
+    public function testSimulaArquivoCsv()
+    {
+        Queue::fake();
+
+        // cria o arquivo fake
+        $csvFilePath = public_path('inputOld.csv');
+        $csvFile = fopen($csvFilePath, 'w');
+        fwrite($csvFile, "header1,header2\nvalue1,value2");
+        fclose($csvFile);
+        
+        $response = $this->postJson('/process-csv-local');
+    
+        // Verifica se a resposta foi bem-sucedida
+        $response->assertStatus(200)
+                ->assertJson(['message' => 'Arquivo enviado, iniciando processamento.']);
+
+        // Verifica se o job foi disparado
+        Queue::assertPushed(ProcessCsvJob::class, function ($job) use ($csvFilePath) {
+            return $job->path === $csvFilePath;  
+        });
     }
 
 }
