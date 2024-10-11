@@ -30,7 +30,7 @@ class Boleto extends Model
         // envia o e-mail
         Mail::to($data['email'])->send(new BoletoGerado($boleto));
 
-        return $boleto; // Retorna o boleto criado, se necessário
+        return $boleto;  
     }
 }
 
