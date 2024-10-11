@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Jobs\ProcessCsvJob;
+use Illuminate\Support\Facades\Log; 
 
 class ProcessaCsvController extends Controller
 {
@@ -62,6 +63,8 @@ class ProcessaCsvController extends Controller
     {
         //
     }
+    
+    //nesse metodo eu recebo o csv através de um request
 
     public function processCsv(Request $request)
     {
@@ -69,12 +72,32 @@ class ProcessaCsvController extends Controller
         $request->validate([
             'file' => 'required|mimes:csv,txt'
         ]);
-
+        
         // armazena o arquivo e inicia o processamento na fila
         $path = $request->file('file')->store('csv_files');
-        // print_r($path);exit;
+         
+        //aqui como o arquivo pode ter um tamanho grande, utilizo um job, para que a tarefa seja realizada em segundo plano, de forma assíncrona, ou seja, sem bloquear a execução do resto do aplicativo
         ProcessCsvJob::dispatch($path);
 
         return response()->json(['message' => 'Arquivo enviado, iniciando processamento.'], 200);
+    }
+
+    // Já nesse método eu pego o arquivo csv de exemplo que foi disponibilizado no teste
+
+    public function processCsvLocal()
+    {
+        // rota do csv
+        $path = public_path('inputOld.csv');
+        
+        // verifica se o arquivo CSV existe
+        if (!file_exists($path)) {
+            return response()->json(['message' => 'Arquivo CSV não encontrado.'], 404);
+        }
+ 
+        //aqui como o arquivo pode ter um tamanho grande, utilizo um job, para que a tarefa seja realizada em segundo plano, de forma assíncrona, ou seja, sem bloquear a execução do resto do aplicativo
+        ProcessCsvJob::dispatch($path); 
+
+        return response()->json(['message' => 'Arquivo enviado, iniciando processamento.'], 200);
+
     }
 }

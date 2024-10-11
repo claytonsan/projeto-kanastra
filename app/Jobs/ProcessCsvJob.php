@@ -23,37 +23,54 @@ class ProcessCsvJob implements ShouldQueue
     }
 
     public function handle()
-    {
-        // Carrega e processa o CSV
-        $file = Storage::get($this->path);
-        $csvData = array_map('str_getcsv', explode("\n", $file));
+    { 
 
-        foreach ($csvData as $row) {
-            
+        $file = fopen($this->path, 'r');
+        
+        // Ignora o cabeçalho
+        fgetcsv($file); 
+ 
+        $errors = [];
+        $savedCount = 0;
+
+        while (($row = fgetcsv($file)) !== FALSE) {
+             
             $boletoData = [
-                'name' => $row[0],
-                'governmentId' => $row[1],
-                'email' => $row[2],
-                'debtAmount' => (float) $row[3],
-                'debtDueDate' => $row[4],
-                'debtId' => $row[5],
+                'name' => $row[0] ?? null,
+                'governmentId' => $row[1] ?? null,
+                'email' => $row[2] ?? null,
+                'debtAmount' => isset($row[3]) && is_numeric($row[3]) ? (float)$row[3] : null,
+                'debtDueDate' => $row[4] ?? null,
+                'debtId' => $row[5] ?? null,
             ];
-            
+
             try {
                 $this->validateBoletoData($boletoData);
 
                 // Verifica se o boleto já foi gerado
                 if (!Boleto::where('debtId', $boletoData['debtId'])->exists()) {
                     $boleto = Boleto::generate($boletoData);
-                    Email::send($boletoData); 
+                    Email::send($boletoData);
+                    $savedCount++;
                 } else {
-                    Log::info("Boleto já gerado para: {$boletoData['name']} com ID de dívida: {$boletoData['debtId']}");
+                    $errors[] = "Boleto já gerado para: {$boletoData['name']} com ID de dívida: {$boletoData['debtId']}";
                 }
             } catch (\Exception $e) {
-                Log::error("Erro ao processar a linha: " . implode(", ", $row) . ". Erro: " . $e->getMessage());
+                $errors[] = "Erro ao processar a linha: " . implode(", ", $row) . ". Erro: " . $e->getMessage();
             }
         }
+
+        if ($savedCount === 0) {
+            Log::error("Nenhum boleto foi salvo. Erros: " . implode("; ", $errors));
+        } else {
+            Log::info("Total de boletos salvos: {$savedCount}");
+        }
+
+        if (!empty($errors)) {
+            // aqui caso haja necessidade podemos configurar um disparo de e-mail para falar que ocorreu um erro ao salvar
+        }
     }
+
 
     protected function validateBoletoData(array $boletoData)
     {
