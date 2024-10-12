@@ -66,19 +66,19 @@ Configuração
 1. Configurar Variáveis de Ambiente
 Renomeie o arquivo .env.example para .env e ajuste as configurações conforme necessário:
 
-```bash
+
 Copiar código
 cp .env.example .env
 2. Gerar Chave da Aplicação
 Gere a chave da aplicação Laravel:
 
-```bash
+
 Copiar código
 ./vendor/bin/sail artisan key:generate
 3. Subir o Ambiente com Docker
 Use o Laravel Sail para subir o ambiente com Docker:
 
-```bash
+
 Copiar código
 ./vendor/bin/sail up -d
 Isso irá iniciar os serviços definidos no docker-compose.yml, como o servidor web e o banco de dados.
@@ -86,19 +86,19 @@ Isso irá iniciar os serviços definidos no docker-compose.yml, como o servidor 
 4. Rodar Migrations e Seeders
 Após os serviços estarem no ar, execute as migrations e seeders para preparar o banco de dados:
 
-```bash
+
 Copiar código
 ./vendor/bin/sail artisan migrate --seed
 5. Executar Testes
 Para rodar os testes, você pode executar o seguinte comando:
 
-```bash
+
 Copiar código
 ./vendor/bin/sail test
 6. Encerrar os Contêineres
 Quando quiser parar o ambiente Docker, use:
 
-```bash
+
 Copiar código
 ./vendor/bin/sail down
 Permissões de Diretório
@@ -106,7 +106,7 @@ Para garantir que a aplicação funcione corretamente, você precisa configurar 
 
 Execute os seguintes comandos para configurar as permissões corretamente:
 
-```bash
+
 Copiar código
 sudo chown -R $USER:$USER storage
 sudo chown -R $USER:$USER bootstrap/cache
