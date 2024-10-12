@@ -59,59 +59,64 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 Primeiro, clone o repositório do Git:
 
 ```bash
-git clone https://github.com/claytonsan/projeto-kanastra.git
-cd projeto-kanastra
+    git clone https://github.com/claytonsan/projeto-kanastra.git
+    cd projeto-kanastra
+```
 
 Configuração
+
 1. Configurar Variáveis de Ambiente
 Renomeie o arquivo .env.example para .env e ajuste as configurações conforme necessário:
 
+```bash
+    cp .env.example .env
+```
 
-Copiar código
-cp .env.example .env
 2. Gerar Chave da Aplicação
+
 Gere a chave da aplicação Laravel:
 
+```bash
+    ./vendor/bin/sail artisan key:generate
+```
 
-Copiar código
-./vendor/bin/sail artisan key:generate
 3. Subir o Ambiente com Docker
 Use o Laravel Sail para subir o ambiente com Docker:
 
-
-Copiar código
-./vendor/bin/sail up -d
+```bash 
+    ./vendor/bin/sail up -d
+```
 Isso irá iniciar os serviços definidos no docker-compose.yml, como o servidor web e o banco de dados.
 
 4. Rodar Migrations e Seeders
 Após os serviços estarem no ar, execute as migrations e seeders para preparar o banco de dados:
 
-
-Copiar código
-./vendor/bin/sail artisan migrate --seed
+```bash 
+    ./vendor/bin/sail artisan migrate --seed
+```
 5. Executar Testes
 Para rodar os testes, você pode executar o seguinte comando:
 
-
-Copiar código
-./vendor/bin/sail test
+```bash 
+    ./vendor/bin/sail test
+```
 6. Encerrar os Contêineres
 Quando quiser parar o ambiente Docker, use:
 
-
-Copiar código
-./vendor/bin/sail down
+```bash 
+    ./vendor/bin/sail down
+```
 Permissões de Diretório
 Para garantir que a aplicação funcione corretamente, você precisa configurar as permissões dos diretórios storage e bootstrap/cache. Essas pastas são essenciais para o funcionamento da aplicação, pois armazenam logs, cache e dados temporários.
 
 Execute os seguintes comandos para configurar as permissões corretamente:
 
-
-Copiar código
-sudo chown -R $USER:$USER storage
-sudo chown -R $USER:$USER bootstrap/cache
-sudo chmod -R 775 storage
-sudo chmod -R 775 bootstrap/cache
+```bash
+    sudo chown -R $USER:$USER storage
+    sudo chown -R $USER:$USER bootstrap/cache
+    sudo chmod -R 775 storage
+    sudo chmod -R 775 bootstrap/cache
+```
 Certifique-se de que o usuário que está executando o servidor web tenha acesso a esses diretórios para evitar problemas durante a execução da aplicação.
 
 ## Contributing
