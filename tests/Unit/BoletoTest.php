@@ -16,8 +16,11 @@ class BoletoTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** primeiro teste é o teste de geração de boleto, aqui com um array simples é verificado se o boleto está sendo criado no banco de dados */
- 
+    /**
+     * Dado um array de dados de boleto,
+     * Quando o método de geração de boleto for chamado,
+     * Então o sistema deve criar o boleto e salvar no banco de dados.
+     */ 
     public function testGerarBoleto()
     {
         $data = [
@@ -38,7 +41,11 @@ class BoletoTest extends TestCase
         ]);
     }
 
-    /** segundo teste é o teste para verificar se o sistema irá duplicar boletos na hora da geração */
+    /**
+     * Dado um boleto existente no sistema,
+     * Quando o método de geração de boleto for chamado novamente com os mesmos dados,
+     * Então o sistema não deve criar um boleto duplicado.
+     */
 
     public function testNaoGerarBoletoDuplicado()
     {
@@ -58,7 +65,11 @@ class BoletoTest extends TestCase
         Boleto::create($data);
     }
 
-    /** terceiro teste é o teste para verificar se o sistema está disparando e-mail na hora da geração do boleto */
+    /**
+     * Dado que um boleto foi gerado com sucesso,
+     * Quando o sistema concluir a geração do boleto,
+     * Então um e-mail de confirmação deve ser disparado para o destinatário.
+     */
 
     public function testDisparaEmailGeracao()
     {
@@ -89,7 +100,12 @@ class BoletoTest extends TestCase
         ]);
     }
 
-    /** quarto teste é pego um arquivo que se encontra na pasta file e é percorrido para salvar as informações dos boletos no banco e disparar e-mails*/
+    /**
+     * Dado um arquivo de boletos localizado na pasta 'file',
+     * Quando o sistema processar o arquivo e percorrer seus registros,
+     * Então as informações de cada boleto devem ser salvas no banco de dados,
+     * E um e-mail de confirmação deve ser disparado para cada boleto gerado.
+     */
 
     public function testProcessarBoletosCsv()
     {
@@ -143,7 +159,13 @@ class BoletoTest extends TestCase
         fclose($file);
     }
 
-    /** nesse teste eu crio um arquivo csv sem as informações corretas para poder validar se salva as informações ou da erro */
+    /**
+     * Dado um arquivo CSV com informações incorretas de boletos,
+     * Quando o sistema tentar processar o arquivo,
+     * Então as informações inválidas não devem ser salvas no banco de dados,
+     * E o sistema deve retornar um erro de validação.
+     */
+    
     public function testSimulaArquivoCsv()
     {
         Queue::fake();
